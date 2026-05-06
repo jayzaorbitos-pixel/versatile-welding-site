@@ -974,11 +974,7 @@
           Request Your Free Quote
         </h3>
 
-        <form action="https://formsubmit.co/Versatileweldingllc@gmail.com" method="POST" class="space-y-5">
-          <input type="hidden" name="_subject" value="New Quote Request - Versatile Mobile Welding">
-          <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_template" value="table">
-          <input type="hidden" name="_next" value="https://versatile-welding-site.vercel.app/#contact">
+        <form id="quote-form" class="space-y-5">
           <div class="grid sm:grid-cols-2 gap-5">
             <div>
               <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
@@ -1185,7 +1181,59 @@
     </div>
   </div>
 </footer>
-</div></div><script src="/embed/main.umd.js"></script>
+</div></div><script>
+  const form = document.getElementById('quote-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      const originalHTML = btn.innerHTML;
+
+      // Loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span>Sending...</span>';
+
+      const data = {
+        name: form.querySelector('[name="name"]')?.value,
+        phone: form.querySelector('[name="phone"]')?.value,
+        email: form.querySelector('[name="email"]')?.value,
+        zipcode: form.querySelector('[name="zipcode"]')?.value,
+        service: form.querySelector('[name="service"]')?.value,
+        message: form.querySelector('[name="message"]')?.value,
+      };
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const json = await res.json();
+
+        if (res.ok) {
+          btn.innerHTML = '<span>✅ Request Sent!</span>';
+          btn.style.background = '#16a34a';
+          form.reset();
+          setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.style.background = '';
+            btn.disabled = false;
+          }, 4000);
+        } else {
+          throw new Error(json.error || 'Something went wrong');
+        }
+      } catch (err) {
+        btn.innerHTML = '<span>❌ ' + err.message + '</span>';
+        btn.style.background = '#dc2626';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 4000);
+      }
+    });
+  }
+</script>
       </div>
     <div class="frame-content"></div></div>
   </body></html>
